@@ -1,5 +1,6 @@
 package br.edu.ifsp.scl.sc3043983.intentscompose
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -29,9 +30,11 @@ class ParameterActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val initialParameter = intent.getStringExtra("EXTRA_PARAMETER") ?: ""
+
         setContent {
             MaterialTheme {
-                var parameterText by remember { mutableStateOf("") }
+                var parameterText by remember { mutableStateOf(initialParameter) }
 
                 Scaffold(
                     topBar = {
@@ -44,7 +47,7 @@ class ParameterActivity : ComponentActivity() {
                         )
                     },
                     content = { innerPadding ->
-                        Column (
+                        Column(
                             modifier = Modifier
                                 .padding(innerPadding)
                                 .fillMaxSize()
@@ -59,8 +62,14 @@ class ParameterActivity : ComponentActivity() {
                             )
 
                             Button(
-                                onClick = {},
-                                modifier = Modifier.fillMaxWidth()
+                                onClick = {
+                                    val returnIntent = Intent().apply {
+                                        putExtra("EXTRA_PARAMETER", parameterText)
+                                    }
+                                    setResult(RESULT_OK, returnIntent)
+                                    finish()
+                                },
+                                modifier = Modifier.fillMaxWidth().padding(top = 16.dp)
                             ) {
                                 Text("Save and quit")
                             }

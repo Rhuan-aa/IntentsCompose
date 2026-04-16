@@ -1,6 +1,7 @@
 package br.edu.ifsp.scl.sc3043983.intentscompose
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -48,6 +49,17 @@ class MainActivity : ComponentActivity() {
             MaterialTheme {
                 var currentParameter by remember { mutableStateOf("Not set yet!!!") }
                 val context = LocalContext.current
+
+                val parameterLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.StartActivityForResult()
+                ) { result ->
+                    if (result.resultCode == Activity.RESULT_OK) {
+                        result.data?.getStringExtra("EXTRA_PARAMETER")?.let { novoParametro ->
+                            currentParameter = novoParametro
+                        }
+                    }
+                }
+
                 val callPermissionLauncher = rememberLauncherForActivityResult(
                     contract = ActivityResultContracts.RequestPermission()
                 ) { isGranted: Boolean ->
@@ -57,11 +69,7 @@ class MainActivity : ComponentActivity() {
                         }
                         context.startActivity(callIntent)
                     } else {
-                        Toast.makeText(
-                            context,
-                            "Permission required!",
-                            Toast.LENGTH_SHORT
-                        ).show()
+                        Toast.makeText(context, "Permission required!", Toast.LENGTH_SHORT).show()
                     }
                 }
 
@@ -74,11 +82,18 @@ class MainActivity : ComponentActivity() {
                                 titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
                             ),
                             actions = {
-                                IconButton(onClick = { }) {
-                                    Icon(
-                                        Icons.Default.Edit,
-                                        contentDescription = "Set Parameter"
-                                    )
+                                IconButton(
+                                    onClick = {
+                                        val intent = Intent(
+                                            context,
+                                            ParameterActivity::class.java
+                                        ).apply {
+                                            putExtra("EXTRA_PARAMETER", currentParameter)
+                                        }
+                                        parameterLauncher.launch(intent)
+                                    }
+                                ) {
+                                    Icon(Icons.Default.Edit, contentDescription = "Set Parameter")
                                 }
 
                                 IconButton(
@@ -88,10 +103,7 @@ class MainActivity : ComponentActivity() {
                                         context.startActivity(navigatorIntent)
                                     }
                                 ) {
-                                    Icon(
-                                        Icons.Default.Language,
-                                        contentDescription = "Web"
-                                    )
+                                    Icon(Icons.Default.Language, contentDescription = "Web")
                                 }
 
                                 IconButton(
@@ -102,10 +114,7 @@ class MainActivity : ComponentActivity() {
                                         context.startActivity(dialIntent)
                                     }
                                 ) {
-                                    Icon(
-                                        Icons.Default.Phone,
-                                        contentDescription = "Dial"
-                                    )
+                                    Icon(Icons.Default.Phone, contentDescription = "Dial")
                                 }
 
                                 IconButton(
